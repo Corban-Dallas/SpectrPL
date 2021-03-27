@@ -4,8 +4,14 @@
 #include <QObject>
 #include <QListWidget>
 #include <QDebug>
-#include "spectrum.h"
 
+// Single spectrum container
+struct Spectrum {
+    QVector<QPointF> points;
+    bool isSaved = false;
+};
+
+// Widget which stores multiple spectra and interacts with graph
 class SpectraStorage : public QListWidget
 {
     Q_OBJECT
@@ -33,5 +39,7 @@ private:
 private slots:
     void sendSpectrumToGraph();
 };
+
+
 
 #endif // SPECTRA_STORAGE_H

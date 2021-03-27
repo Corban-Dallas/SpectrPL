@@ -6,7 +6,6 @@
 #include <QtCharts/QLineSeries>
 
 #include "graph.h"
-#include "spectrum.h"
 #include "position_dialog.h"
 #include "debug_dialog.h"
 #include "scandialog.h"
@@ -51,9 +50,10 @@ private slots:
     void on_actionScaning_triggered();
 
 public slots:
-    void setGuiModeReady();
-    void setGuiModeWorking();
-    void setGuiModeNotReady();
+    void setGuiMode(GuiMode);
+    //void setGuiModeReady();
+    //void setGuiModeWorking();
+    //void setGuiModeNotReady();
 
 private:
     Ui::MainWindow *ui;

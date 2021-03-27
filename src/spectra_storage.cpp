@@ -28,7 +28,7 @@ void SpectraStorage::finishSpectrum() {
     if (points->count() == 0) return;
 
     Spectrum spectrum;
-    spectrum.setPoints(points);
+    spectrum.points = *points;
     storage.append(spectrum);
 
     int count = this->count();
@@ -40,7 +40,7 @@ bool SpectraStorage::isAllSaved() {
     //for (auto it = storage.begin(); it != storage.end(); ++it)
         //if (!it->isSaved()) return false;
     for (auto spectrum : storage)
-        if (!spectrum.isSaved()) return false;
+        if (!spectrum.isSaved) return false;
     return true;
 }
 
@@ -52,7 +52,7 @@ Spectrum* SpectraStorage::getSpectrum() {
 
 void SpectraStorage::sendSpectrumToGraph() {
     int index = this->currentRow();
-    QVector<QPointF> p = storage[index].points();
+    QVector<QPointF> p = storage[index].points;
     emit changePlot(p);
     return;
 }

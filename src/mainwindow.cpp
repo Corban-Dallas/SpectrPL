@@ -43,19 +43,22 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(cs, &CommandServer::wlUpdated,
             ui->dsb_current_wl, &QDoubleSpinBox::setValue);
 
-    // WokerThread
+    // WokerThread. The separate thread working with hardware during measuring.
     workerThread = new QThread();
 
     connect(workerThread, &QThread::started,
-            this, &MainWindow::setGuiModeWorking);
+            [=]() { this->setGuiMode(deviceIsWorking); });
     connect(workerThread, &QThread::finished,
-            this, &MainWindow::setGuiModeReady);
+            [=]() { this->setGuiMode(deviceIsIdle); });
+
+    // Снимаем питание что бы двигатель не грелся в простое.
+    // Из-за этого может накапливаться люфт.
     connect(workerThread, &QThread::started,
             smd, &SMD::powerOn);
     connect(workerThread, &QThread::finished,
             smd, &SMD::powerOff);
 
-    // Emergency Stop
+    // Emergency stop a step motor drive
     connect(ui->pbEmStop, &QPushButton::clicked,
             smd, &SMD::stop);
 
@@ -117,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Initial state
     ui->actionFastScaning->trigger();
     //setGuiModeNotReady();
-    setGuiModeReady();
+    setGuiMode(deviceDisconnected);
 }
 
 void MainWindow::writeSettings() {
@@ -202,79 +205,89 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
 
 void MainWindow::updateSmdPortState(bool connected) {
     smdConnected = connected;
-    if ((smdConnected && cntConnected) == true) setGuiModeReady();
-    else setGuiModeNotReady();
+    if ((smdConnected && cntConnected) == true) setGuiMode(deviceConnected);
+    else setGuiMode(deviceDisconnected);
 }
 
 void MainWindow::updateCntPortState(bool connected) {
     cntConnected = connected;
-    if ((smdConnected && cntConnected) == true) setGuiModeReady();
-    else setGuiModeNotReady();
+    if ((smdConnected && cntConnected) == true) setGuiMode(deviceConnected);
+    else setGuiMode(deviceDisconnected);
 }
 
 // PUBLIC SLOTS
-void MainWindow::setGuiModeReady() {
-    // Actions
-    ui->actionScaning->setEnabled(true);
-    ui->actionFastScaning->setEnabled(true);
-    ui->actionMonitor->setEnabled(true);
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(true);
-    ui->actionPosition->setEnabled(true);
-    ui->actionScanProfiles->setEnabled(true);
-    ui->actionSerialPort->setEnabled(false);
-    // Control box
-    ui->gbControl->setEnabled(true);
-    ui->sbBegin->setReadOnly(false);
-    ui->sbEnd->setReadOnly(false);
-    ui->sbStep->setReadOnly(false);
-    ui->sbTime->setReadOnly(false);
-    ui->sbPoints->setReadOnly(false);
-    ui->dsb_current_wl->setReadOnly(false);
-    ui->pbStart->setEnabled(true);
-    ui->pbStop->setEnabled(false);
-    ui->rbChanel1->setEnabled(true);
-    ui->rbChanel2->setEnabled(true);
-    // Data box
-    ui->gbData->setEnabled(true);
-}
 
-void MainWindow::setGuiModeNotReady() {
-    // Actions
-    ui->actionScaning->setEnabled(false);
-    ui->actionFastScaning->setEnabled(false);
-    ui->actionMonitor->setEnabled(false);
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionPosition->setEnabled(false);
-    ui->actionScanProfiles->setEnabled(false);
-    ui->actionSerialPort->setEnabled(true);
-    // Control box
-    ui->gbControl->setEnabled(false);
-}
+void MainWindow::setGuiMode(GuiMode mode) {
+    switch(mode) {
+    case deviceConnected:
 
-void MainWindow::setGuiModeWorking() {
-    // Actions
-    ui->actionScaning->setEnabled(false);
-    ui->actionFastScaning->setEnabled(false);
-    ui->actionMonitor->setEnabled(false);
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionPosition->setEnabled(false);
-    ui->actionScanProfiles->setEnabled(false);
-    // Control box
-    ui->sbBegin->setReadOnly(true);
-    ui->sbEnd->setReadOnly(true);
-    ui->sbStep->setReadOnly(true);
-    ui->sbTime->setReadOnly(true);
-    ui->sbPoints->setReadOnly(true);
-    ui->dsb_current_wl->setReadOnly(true);
-    ui->pbStart->setEnabled(false);
-    ui->pbStop->setEnabled(true);
-    ui->rbChanel1->setEnabled(false);
-    ui->rbChanel2->setEnabled(false);
-    // Data box
-    ui->gbData->setEnabled(false);
+    case deviceIsIdle:
+        // Actions
+        ui->actionScaning->setEnabled(true);
+        ui->actionFastScaning->setEnabled(true);
+        ui->actionMonitor->setEnabled(true);
+        ui->actionConnect->setEnabled(false);
+        ui->actionDisconnect->setEnabled(true);
+        ui->actionPosition->setEnabled(true);
+        ui->actionScanProfiles->setEnabled(true);
+        ui->actionSerialPort->setEnabled(false);
+        // Control box
+        ui->gbControl->setEnabled(true);
+        ui->sbBegin->setReadOnly(false);
+        ui->sbEnd->setReadOnly(false);
+        ui->sbStep->setReadOnly(false);
+        ui->sbTime->setReadOnly(false);
+        ui->sbPoints->setReadOnly(false);
+        ui->dsb_current_wl->setReadOnly(false);
+        ui->pbStart->setEnabled(true);
+        ui->pbStop->setEnabled(false);
+        ui->rbChanel1->setEnabled(true);
+        ui->rbChanel2->setEnabled(true);
+        // Data box
+        ui->gbData->setEnabled(true);
+        qDebug() << "[MainWindow] Set GUI ready";
+        break;
+
+    case deviceDisconnected:
+        // Actions
+        ui->actionScaning->setEnabled(false);
+        ui->actionFastScaning->setEnabled(false);
+        ui->actionMonitor->setEnabled(false);
+        ui->actionConnect->setEnabled(true);
+        ui->actionDisconnect->setEnabled(false);
+        ui->actionPosition->setEnabled(false);
+        ui->actionScanProfiles->setEnabled(false);
+        ui->actionSerialPort->setEnabled(true);
+        // Control box
+        ui->gbControl->setEnabled(false);
+        qDebug() << "[MainWindow] Set GUI not ready";
+        break;
+
+    case deviceIsWorking:
+        // Actions
+        ui->actionScaning->setEnabled(false);
+        ui->actionFastScaning->setEnabled(false);
+        ui->actionMonitor->setEnabled(false);
+        ui->actionConnect->setEnabled(false);
+        ui->actionDisconnect->setEnabled(false);
+        ui->actionPosition->setEnabled(false);
+        ui->actionScanProfiles->setEnabled(false);
+        // Control box
+        ui->sbBegin->setReadOnly(true);
+        ui->sbEnd->setReadOnly(true);
+        ui->sbStep->setReadOnly(true);
+        ui->sbTime->setReadOnly(true);
+        ui->sbPoints->setReadOnly(true);
+        ui->dsb_current_wl->setReadOnly(true);
+        ui->pbStart->setEnabled(false);
+        ui->pbStop->setEnabled(true);
+        ui->rbChanel1->setEnabled(false);
+        ui->rbChanel2->setEnabled(false);
+        // Data box
+        ui->gbData->setEnabled(false);
+        qDebug() << "[MainWindow] Set GUI working";
+        break;
+    }
 }
 
 void MainWindow::saveSpectra() {
@@ -293,13 +306,13 @@ void MainWindow::saveSpectra() {
     }
     QTextStream stream(&saveFile);
 
-    QVector<QPointF> points = storage->getSpectrum()->points();
+    QVector<QPointF> points = storage->getSpectrum()->points;
 
     for (auto point : points)
         stream << QString("%1 %2\r").arg(point.x(),0, 'f', 2).arg(point.y(),0,'f',1) << endl;
 
     saveFile.close();
-    storage->getSpectrum()->setSaved(true);
+    storage->getSpectrum()->isSaved = true;
     storage->setRowText(fileName);
     qDebug() << "[MainWindow] Spectrum saved";
 }
@@ -308,30 +321,9 @@ void MainWindow::showErrorMessage(QString msg) {
     QMessageBox::critical(this, "Error", msg);
 }
 
-void MainWindow::on_pbStart_clicked() {  
-    double begin = ui->sbBegin->value();
-    double end = ui->sbEnd->value();
-    double step = ui->sbStep->value();
-    ushort acquisition = ui->sbTime->value();
-    uchar channel = 0;
-    if (ui->rbChanel1->isChecked()) channel = 1;
-
-    // SCANING
-    if (ui->actionScaning->isChecked()) StartScan(begin, end, step, acquisition, channel);
-    // FAST SCANING
-    if (ui->actionFastScaning->isChecked()) StartFastScan(begin, end, acquisition, channel);
-    // MONITOR        
-    if (ui->actionMonitor->isChecked()) StartMonitor(acquisition, channel);
-    return;
-}
-
-void MainWindow::on_pbStop_clicked() {
-    globalRequests.stopWork = true;
-}
-
+// Measure procesess
 void MainWindow::StartScan(double begin, double end, double step,
                            ushort acquisition, uchar channel) {
-    qDebug() << "[MainWindow] Start ScanWorker";
 
     if (end > begin) graph->setXRange(begin, end);
     else graph->setXRange(end, begin);
@@ -370,13 +362,12 @@ void MainWindow::StartScan(double begin, double end, double step,
     connect(workerThread, &QThread::finished,
             scanWorker, &ScanWorker::deleteLater);
 
+    qDebug() << "[MainWindow] Start ScanWorker";
     workerThread->start();
 }
 
 void MainWindow::StartFastScan(double begin, double end,
                            ushort acquisition, uchar channel) {
-    qDebug() << "[MainWindow] FastStart ScanWorker";
-
     if (end > begin) graph->setXRange(begin, end);
     else graph->setXRange(end, begin);
 
@@ -411,12 +402,11 @@ void MainWindow::StartFastScan(double begin, double end,
     connect(workerThread, &QThread::finished,
             fastScanWorker, &FastScanWorker::deleteLater);
 
+    qDebug() << "[MainWindow] Start fastScanWorker";
     workerThread->start();
 }
 
 void MainWindow::StartMonitor(ushort acquisition, uchar channel) {
-    qDebug() << "[MainWindow] Start MonitorWorker";
-
     monitorWorker = new MonitorWorker(cs, acquisition, channel);
     monitorWorker->moveToThread(workerThread);
 
@@ -438,6 +428,7 @@ void MainWindow::StartMonitor(ushort acquisition, uchar channel) {
     connect(workerThread, &QThread::finished,
             monitorWorker, &MonitorWorker::deleteLater);
 
+    qDebug() << "[MainWindow] Start monitorWorker";
     workerThread->start();
 }
 
@@ -445,7 +436,6 @@ void MainWindow::ChangePosition(double wavelength) {
     gotoWorker = new GotoWavelengthWorker(cs, wavelength);
     gotoWorker->moveToThread(workerThread);
 
-    // m2pWorker & Thread
     connect(workerThread, &QThread::started,
             gotoWorker, &GotoWavelengthWorker::start);
     connect(gotoWorker, &GotoWavelengthWorker::stoped,
@@ -453,13 +443,8 @@ void MainWindow::ChangePosition(double wavelength) {
     connect(workerThread, &QThread::finished,
             gotoWorker, &GotoWavelengthWorker::deleteLater);
 
+    qDebug() << "[MainWindow] Start gotoWorker";
     workerThread->start();
-}
-
-void MainWindow::on_actionAbout_triggered() {
-    QMessageBox::about(this, "About", "Organisation: ISP SB RAS\n"
-                                      "Author: Grogory Krivyakin\n"
-                                      "Contact: krivyakin@isp.nsc.ru");
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -486,6 +471,34 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         writeSettings();
         event->accept();
     }
+}
+
+// Automaticaly generated slots from UI redactor
+void MainWindow::on_pbStart_clicked() {
+    double begin = ui->sbBegin->value();
+    double end = ui->sbEnd->value();
+    double step = ui->sbStep->value();
+    ushort acquisition = ui->sbTime->value();
+    uchar channel = 0;
+    if (ui->rbChanel1->isChecked()) channel = 1;
+
+    // SCANING
+    if (ui->actionScaning->isChecked()) StartScan(begin, end, step, acquisition, channel);
+    // FAST SCANING
+    if (ui->actionFastScaning->isChecked()) StartFastScan(begin, end, acquisition, channel);
+    // MONITOR
+    if (ui->actionMonitor->isChecked()) StartMonitor(acquisition, channel);
+    return;
+}
+
+void MainWindow::on_pbStop_clicked() {
+    globalRequests.stopWork = true;
+}
+
+void MainWindow::on_actionAbout_triggered() {
+    QMessageBox::about(this, "About", "Organisation: ISP SB RAS\n"
+                                      "Author: Grogory Krivyakin\n"
+                                      "Contact: krivyakin@isp.nsc.ru");
 }
 
 void MainWindow::on_actionMonitor_triggered() {

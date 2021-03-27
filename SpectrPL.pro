@@ -30,7 +30,6 @@ SOURCES +=\
     src/scandialog.cpp \
     src/smd.cpp \
     src/spectra_storage.cpp \
-    src/spectrum.cpp \
     src/statuswidget.cpp
 
 HEADERS  += \
@@ -51,7 +50,6 @@ HEADERS  += \
     src/scandialog.h \
     src/smd.h \
     src/spectra_storage.h \
-    src/spectrum.h \
     src/statuswidget.h
 
 FORMS += \

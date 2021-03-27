@@ -46,11 +46,11 @@ struct GraphParameters {
 };
 
 // Gui
-enum GuiMode : uchar {
-    DeviceConnected = 0,
-    DeviceDisconnected = 1,
-    DeviceIsWorking = 2,
-    DeviceIsIdle = 3
+enum GuiMode {
+    deviceConnected,
+    deviceDisconnected,
+    deviceIsWorking,
+    deviceIsIdle
 };
 
 
