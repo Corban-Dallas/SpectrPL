@@ -97,9 +97,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(cs, &CommandServer::stUpdated,
             debugDialog, &DebugDialog::updatePosition);
 
-    // Log
-    log = new Log("log.txt");
-
     // Spectra Storage Widget
     storage = new SpectraStorage();
     ui->gbData->layout()->addWidget(storage);

@@ -11,7 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SpectrPL
 TEMPLATE = app
 
-
 SOURCES +=\
     src/cnt.cpp \
     src/command_server.cpp \
@@ -20,7 +19,6 @@ SOURCES +=\
     src/goto_wavelength_worker.cpp \
     src/graph.cpp \
     src/graph_dialog.cpp \
-    src/log.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/monitor_worker.cpp \
@@ -41,7 +39,6 @@ HEADERS  += \
     src/goto_wavelength_worker.h \
     src/graph.h \
     src/graph_dialog.h \
-    src/log.h \
     src/mainwindow.h \
     src/monitor_worker.h \
     src/port_dialog.h \

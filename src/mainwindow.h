@@ -5,19 +5,22 @@
 #include <QThread>
 #include <QtCharts/QLineSeries>
 
-#include "graph.h"
-#include "position_dialog.h"
-#include "debug_dialog.h"
-#include "scandialog.h"
-#include "port_dialog.h"
-#include "log.h"
 #include "smd.h"
 #include "cnt.h"
+
 #include "scan_worker.h"
 #include "fast_scan_worker.h"
 #include "monitor_worker.h"
 #include "goto_wavelength_worker.h"
+
+// GUI widgets
+#include "graph.h"
 #include "spectra_storage.h"
+
+#include "position_dialog.h"
+#include "debug_dialog.h"
+#include "scandialog.h"
+#include "port_dialog.h"
 
 QT_USE_NAMESPACE
 
@@ -82,8 +85,6 @@ private:
     // Дополнительные виджеты
     Graph *graph;
     SpectraStorage *storage;
-
-    Log *log;
 
     bool smdConnected = false;
     bool cntConnected = false;
