@@ -257,6 +257,6 @@ bool SMD::setMove(uint steps) {
 }
 
 bool SMD::stop() {
-    return sendCommand("SP>", NULL);
     emit moveStoped();
+    return sendCommand("SP>", NULL);
 }

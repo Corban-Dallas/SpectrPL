@@ -47,9 +47,9 @@ MainWindow::MainWindow(QWidget *parent) :
     workerThread = new QThread();
 
     connect(workerThread, &QThread::started,
-            [=]() { this->setGuiMode(deviceIsWorking); });
+            this, [=]() { this->setGuiMode(deviceIsWorking); });
     connect(workerThread, &QThread::finished,
-            [=]() { this->setGuiMode(deviceIsIdle); });
+            this, [=]() { this->setGuiMode(deviceIsIdle); });
 
     // Снимаем питание что бы двигатель не грелся в простое.
     // Из-за этого может накапливаться люфт.
