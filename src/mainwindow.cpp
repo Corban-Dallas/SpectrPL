@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Читаем файл параметров
     readSettings();
 
+
     // SMD and CNT
     smd = new SMD();
     cnt = new CNT();
@@ -62,13 +63,29 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pbEmStop, &QPushButton::clicked,
             smd, &SMD::stop);
 
-    // Port Dialog
+    // Create dialogs
+    createPortDialog();
+    createPositionDialog();
+    createScanProfilesDialog();
+
+    // Create widgets
+    createSpectraListWidget();
+    createGraphWidget();
+
+    // Initial state
+    ui->actionFastScaning->trigger();
+    setGuiMode(deviceConnected);
+}
+
+// Diologs
+void MainWindow::createPortDialog() {
     portDialog = new PortDialog(this);
 
     connect(ui->actionSerialPort, &QAction::triggered,
             portDialog, &PortDialog::show);
+}
 
-    // Position Dialog
+void MainWindow::createPositionDialog() {
     posDialog = new PositionDialog(this);
 
     connect(cs, &CommandServer::stUpdated,
@@ -79,8 +96,9 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(recalcFastScanStep()));
     connect(ui->actionPosition, &QAction::triggered,
             posDialog, &PositionDialog::show);
+}
 
-    // Scan Profiles Dialog
+void MainWindow::createScanProfilesDialog() {
     scanDialog = new ScanDialog(this);
 
     connect(scanDialog, SIGNAL(okClicked()),
@@ -89,22 +107,18 @@ MainWindow::MainWindow(QWidget *parent) :
             scanDialog, &ScanDialog::show);
     connect(scanDialog, &ScanDialog::setCntDac,
             cs, &CommandServer::setCntDac);
+}
 
-    // Debug Dialog
-    debugDialog = new DebugDialog(smd);
-    connect(ui->actionDebug_panel, &QAction::triggered,
-            debugDialog, &DebugDialog::show);
-    connect(cs, &CommandServer::stUpdated,
-            debugDialog, &DebugDialog::updatePosition);
+// Widgets
+void MainWindow::createSpectraListWidget() {
+    spectraList = new SpectraList();
+    ui->gbData->layout()->addWidget(spectraList);
+}
 
-    // Spectra Storage Widget
-    storage = new SpectraStorage();
-    ui->gbData->layout()->addWidget(storage);
-
-    // Graph Widget
+void MainWindow::createGraphWidget() {
     graph = new Graph();
     ui->rightLayout->addWidget(graph);
-    connect(storage, &SpectraStorage::changePlot,
+    connect(spectraList, &SpectraList::changePlot,
             graph, &Graph::plot);
 
     // Connect other slots
@@ -112,14 +126,9 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::saveSpectra);
     connect(ui->sbTime, SIGNAL(valueChanged(int)),
             this, SLOT(recalcFastScanStep()));
-
-
-    // Initial state
-    ui->actionFastScaning->trigger();
-    //setGuiModeNotReady();
-    setGuiMode(deviceDisconnected);
 }
 
+// Private funcs
 void MainWindow::writeSettings() {
     settings->beginGroup("SMD");
     settings->setValue("portName", globalParams.smd.port.portName);
@@ -303,14 +312,14 @@ void MainWindow::saveSpectra() {
     }
     QTextStream stream(&saveFile);
 
-    QVector<QPointF> points = storage->getSpectrum()->points;
+    QVector<QPointF> points = spectraList->getSpectrum()->points;
 
     for (auto point : points)
-        stream << QString("%1 %2\r").arg(point.x(),0, 'f', 2).arg(point.y(),0,'f',1) << endl;
+        stream << QString("%1 %2\r").arg(point.x(),0, 'f', 2).arg(point.y(),0,'f',1) << Qt::endl;
 
     saveFile.close();
-    storage->getSpectrum()->isSaved = true;
-    storage->setRowText(fileName);
+    spectraList->getSpectrum()->isSaved = true;
+    spectraList->setRowText(fileName);
     qDebug() << "[MainWindow] Spectrum saved";
 }
 
@@ -341,19 +350,19 @@ void MainWindow::StartScan(double begin, double end, double step,
     connect(scanWorker, &ScanWorker::started,
             graph, &Graph::startPlot);
     connect(scanWorker, &ScanWorker::started,
-            storage, &SpectraStorage::startSpectrum);
+            spectraList, &SpectraList::startSpectrum);
 
     // Proceed
     connect(scanWorker, &ScanWorker::newPoint,
             graph, &Graph::addPoint);
     connect(scanWorker, &ScanWorker::newPoint,
-            storage, &SpectraStorage::addPoint);
+            spectraList, &SpectraList::addPoint);
 
     // Stop
     connect(scanWorker, &ScanWorker::stoped,
             graph, &Graph::finishPlot);
     connect(scanWorker, &ScanWorker::stoped,
-            storage, &SpectraStorage::finishSpectrum);
+            spectraList, &SpectraList::finishSpectrum);
     connect(scanWorker, &ScanWorker::stoped,
             workerThread, &QThread::quit);
     connect(workerThread, &QThread::finished,
@@ -383,17 +392,17 @@ void MainWindow::StartFastScan(double begin, double end,
     connect(fastScanWorker, &FastScanWorker::started,
             graph, &Graph::startPlot);
     connect(fastScanWorker, &FastScanWorker::started,
-            storage, &SpectraStorage::startSpectrum);
+            spectraList, &SpectraList::startSpectrum);
     // Proceed
     connect(fastScanWorker, &FastScanWorker::newPoint,
             graph, &Graph::addPoint);
     connect(fastScanWorker, &FastScanWorker::newPoint,
-            storage, &SpectraStorage::addPoint);
+            spectraList, &SpectraList::addPoint);
     // End
     connect(fastScanWorker, &FastScanWorker::stoped,
             graph, &Graph::finishPlot);
     connect(fastScanWorker, &FastScanWorker::stoped,
-            storage, &SpectraStorage::finishSpectrum);
+            spectraList, &SpectraList::finishSpectrum);
     connect(fastScanWorker, &FastScanWorker::stoped,
             workerThread, &QThread::quit);
     connect(workerThread, &QThread::finished,
@@ -446,9 +455,9 @@ void MainWindow::ChangePosition(double wavelength) {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     qDebug() << "[MainWindow] Close event";
-    qDebug() << "[MainWindow] All data are saved:" << storage->isAllSaved();
+    qDebug() << "[MainWindow] All data are saved:" << spectraList->isAllSaved();
 
-    if (!storage->isAllSaved()) {
+    if (!spectraList->isAllSaved()) {
         QMessageBox::StandardButton answer;
         answer = QMessageBox::question(this, "Exit",
             "Not all data were saved. Do you realy want to quit?");

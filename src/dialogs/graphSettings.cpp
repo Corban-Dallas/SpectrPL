@@ -1,9 +1,9 @@
-#include "graph_dialog.h"
-#include "ui_graph_dialog.h"
+#include "graphSettings.h"
+#include "ui_graphSettings.h"
 
 GraphDialog::GraphDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::GraphDialog)
+    ui(new Ui::GraphSettings)
 {
     ui->setupUi(this);
     //params = &globalParams.graph;

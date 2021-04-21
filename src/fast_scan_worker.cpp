@@ -8,8 +8,8 @@ FastScanWorker::FastScanWorker(CommandServer *cs, ScanParameters params,
     channel = params.channel;
     acquisition = params.acquisition;
 
-    if (end > begin) scan_dir = 1;
-    else scan_dir = -1;
+    if (end > begin) scanDirection = 1;
+    else scanDirection = -1;
 
     globalParams.smd.speed = globalParams.app.fScanSpeed;
     globalParams.smd.accel = globalParams.app.fScanAccel;
@@ -38,17 +38,16 @@ void FastScanWorker::start() {
     qDebug() << "[FastScanWorker] Start";
     emit setAcquisition(acquisition);
 
-    double wl = 0;
-    if (is_luft) wl = begin - scan_dir*luft;
-    else wl = begin;
+    double wl = begin;
+    if (isLuft) wl = begin - scanDirection*luft;
 
     emit gotoWavelength(wl);
     emit started();
 }
 
 void FastScanWorker::gotoNextPosition() {
-    if (is_luft) {
-        is_luft = false;
+    if (isLuft) {
+        isLuft = false;
         emit gotoWavelength(end);
         emit reqSignalAcquire(channel);
     }
@@ -70,7 +69,7 @@ void FastScanWorker::registerSignal(uint signal) {
 
 void FastScanWorker::stop() {
     globalRequests.stopWork = false;
-    if (is_luft) emit stoped();
+    if (isLuft) emit stoped();
     else last_point = true;
 }
 

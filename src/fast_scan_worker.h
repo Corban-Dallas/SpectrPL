@@ -33,9 +33,9 @@ private:
     double begin, end;
     uchar channel;
     ushort acquisition;
-    char scan_dir;
+    char scanDirection;
 
-    bool is_luft = true;
+    bool isLuft = true;
     double luft = 30;
     double wavelength;
 

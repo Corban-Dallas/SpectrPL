@@ -2,7 +2,7 @@
 #define SCANDIALOG_H
 
 #include <QDialog>
-#include "globalparams.h"
+#include "../globalparams.h"
 
 extern Parameters globalParams;
 

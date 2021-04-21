@@ -14,13 +14,14 @@
 #include "goto_wavelength_worker.h"
 
 // GUI widgets
-#include "graph.h"
-#include "spectra_storage.h"
+#include "widgets/graph.h"
+#include "widgets/spectraList.h"
 
-#include "position_dialog.h"
-#include "debug_dialog.h"
-#include "scandialog.h"
-#include "port_dialog.h"
+// Diologs
+#include "dialogs/position_dialog.h"
+#include "dialogs/debug_dialog.h"
+#include "dialogs/scandialog.h"
+#include "dialogs/port_dialog.h"
 
 QT_USE_NAMESPACE
 
@@ -67,6 +68,15 @@ private:
     CNT *cnt;
     CommandServer *cs;
 
+    // Dialogs
+    void createPortDialog();
+    void createPositionDialog();
+    void createScanProfilesDialog();
+
+    // Widgets
+    void createSpectraListWidget();
+    void createGraphWidget();
+
     ScanWorker *scanWorker;
     FastScanWorker *fastScanWorker;
     MonitorWorker *monitorWorker;
@@ -84,7 +94,7 @@ private:
 
     // Дополнительные виджеты
     Graph *graph;
-    SpectraStorage *storage;
+    SpectraList *spectraList;
 
     bool smdConnected = false;
     bool cntConnected = false;

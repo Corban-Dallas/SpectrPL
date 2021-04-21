@@ -1,29 +1,29 @@
-#include "spectra_storage.h"
+#include "spectraList.h"
 
-SpectraStorage::SpectraStorage(QWidget *parent) : QListWidget(parent) {
+SpectraList::SpectraList(QWidget *parent) : QListWidget(parent) {
     //qRegisterMetaType<QVector<QPointF> >();
     //
     points = new QVector<QPointF>;
-    connect(this, &SpectraStorage::itemSelectionChanged,
-            this, &SpectraStorage::sendSpectrumToGraph);
+    connect(this, &SpectraList::itemSelectionChanged,
+            this, &SpectraList::sendSpectrumToGraph);
 }
 
-void SpectraStorage::setRowText(QString text) {
+void SpectraList::setRowText(QString text) {
     int index = this->currentRow();
     this->item(index)->setText(text);
 }
 
-void SpectraStorage::startSpectrum() {
+void SpectraList::startSpectrum() {
     qDebug() << "[SpectraStorage] Start spectrum";
     points->clear();
 }
 
-void SpectraStorage::addPoint(double x, double y) {
+void SpectraList::addPoint(double x, double y) {
     qDebug() << "[SpectraStorage] Add point";
     points->append(QPointF(x, y));
 }
 
-void SpectraStorage::finishSpectrum() {
+void SpectraList::finishSpectrum() {
     qDebug() << "[SpectraStorage] End spectrum";
     if (points->count() == 0) return;
 
@@ -36,7 +36,7 @@ void SpectraStorage::finishSpectrum() {
     this->setCurrentRow(count);
 }
 
-bool SpectraStorage::isAllSaved() {
+bool SpectraList::isAllSaved() {
     //for (auto it = storage.begin(); it != storage.end(); ++it)
         //if (!it->isSaved()) return false;
     for (auto spectrum : storage)
@@ -44,19 +44,19 @@ bool SpectraStorage::isAllSaved() {
     return true;
 }
 
-Spectrum* SpectraStorage::getSpectrum() {
+Spectrum* SpectraList::getSpectrum() {
     int index = this->currentRow();
     return &storage[index];
 }
 
 
-void SpectraStorage::sendSpectrumToGraph() {
+void SpectraList::sendSpectrumToGraph() {
     int index = this->currentRow();
     QVector<QPointF> p = storage[index].points;
     emit changePlot(p);
     return;
 }
 
-SpectraStorage::~SpectraStorage() {
+SpectraList::~SpectraList() {
 
 }

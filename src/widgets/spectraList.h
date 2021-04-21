@@ -1,5 +1,5 @@
-#ifndef SPECTRA_STORAGE_H
-#define SPECTRA_STORAGE_H
+#ifndef SPECTRALIST_H
+#define SPECTRALIST_H
 
 #include <QObject>
 #include <QListWidget>
@@ -12,7 +12,7 @@ struct Spectrum {
 };
 
 // Widget which stores multiple spectra and interacts with graph
-class SpectraStorage : public QListWidget
+class SpectraList : public QListWidget
 {
     Q_OBJECT
 
@@ -20,8 +20,8 @@ signals:
     void changePlot(QVector<QPointF>);
 
 public:
-    explicit SpectraStorage(QWidget *parent = 0);
-    ~SpectraStorage();
+    explicit SpectraList(QWidget *parent = 0);
+    ~SpectraList();
 
     Spectrum* getSpectrum();
     void setRowText(QString text);
@@ -42,4 +42,4 @@ private slots:
 
 
 
-#endif // SPECTRA_STORAGE_H
+#endif // SPECTRALIST_H

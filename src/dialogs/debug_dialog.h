@@ -2,8 +2,8 @@
 #define DEBUB_DIALOG_H
 
 #include <QDialog>
-#include "smd.h"
-#include "globalparams.h"
+#include "../smd.h"
+#include "../globalparams.h"
 
 extern Parameters globalParams;
 

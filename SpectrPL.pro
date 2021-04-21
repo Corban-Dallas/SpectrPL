@@ -14,46 +14,46 @@ TEMPLATE = app
 SOURCES +=\
     src/cnt.cpp \
     src/command_server.cpp \
-    src/debug_dialog.cpp \
+    src/dialogs/debug_dialog.cpp \
+    src/dialogs/graphSettings.cpp \
+    src/dialogs/port_dialog.cpp \
+    src/dialogs/position_dialog.cpp \
+    src/dialogs/scanDialog.cpp \
     src/fast_scan_worker.cpp \
     src/goto_wavelength_worker.cpp \
-    src/graph.cpp \
-    src/graph_dialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/monitor_worker.cpp \
-    src/port_dialog.cpp \
-    src/position_dialog.cpp \
     src/scan_worker.cpp \
-    src/scandialog.cpp \
     src/smd.cpp \
-    src/spectra_storage.cpp \
-    src/statuswidget.cpp
+    src/widgets/graph.cpp \
+    src/widgets/spectraList.cpp \
+    src/widgets/statuswidget.cpp
 
 HEADERS  += \
     src/cnt.h \
     src/command_server.h \
-    src/debug_dialog.h \
+    src/dialogs/debug_dialog.h \
+    src/dialogs/graphSettings.h \
+    src/dialogs/port_dialog.h \
+    src/dialogs/position_dialog.h \
+    src/dialogs/scandialog.h \
     src/fast_scan_worker.h \
     src/globalparams.h \
     src/goto_wavelength_worker.h \
-    src/graph.h \
-    src/graph_dialog.h \
     src/mainwindow.h \
     src/monitor_worker.h \
-    src/port_dialog.h \
-    src/position_dialog.h \
     src/scan_worker.h \
-    src/scandialog.h \
     src/smd.h \
-    src/spectra_storage.h \
-    src/statuswidget.h
+    src/widgets/graph.h \
+    src/widgets/spectraList.h \
+    src/widgets/statuswidget.h
 
 FORMS += \
-    src/debug_dialog.ui \
-    src/graph_dialog.ui \
+    src/dialogs/debug_dialog.ui \
+    src/dialogs/graphSettings.ui \
+    src/dialogs/port_dialog.ui \
+    src/dialogs/position_dialog.ui \
+    src/dialogs/scanDialog.ui \
     src/mainwindow.ui \
-    src/port_dialog.ui \
-    src/position_dialog.ui \
-    src/scandialog.ui \
-    src/statuswidget.ui
+    src/widgets/statuswidget.ui

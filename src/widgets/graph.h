@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QWidget>
 #include <QtCharts>
-#include "graph_dialog.h"
-#include "globalparams.h"
+#include "../dialogs/graphSettings.h"
+#include "../globalparams.h"
 
 extern Parameters globalParams;
 
@@ -61,9 +61,9 @@ private:
     double scanEnd;
 
     enum GraphMode : uchar {
-        Monitoring, // Когда включени монитор
-        Plotting,   // Когда идёт сканирование
-        Idle        // Когда устройство бездействует
+        Monitoring, // РљРѕРіРґР° РІРєР»СЋС‡РµРЅРё РјРѕРЅРёС‚РѕСЂ
+        Plotting,   // РљРѕРіРґР° РёРґС‘С‚ СЃРєР°РЅРёСЂРѕРІР°РЅРёРµ
+        Idle        // РљРѕРіРґР° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ Р±РµР·РґРµР№СЃС‚РІСѓРµС‚
     };
 };
 

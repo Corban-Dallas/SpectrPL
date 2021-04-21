@@ -2,12 +2,12 @@
 #define GRAPHDIALOG_H
 
 #include <QDialog>
-#include "globalparams.h"
+#include "..\globalparams.h"
 
 extern Parameters globalParams;
 
 namespace Ui {
-class GraphDialog;
+class GraphSettings;
 }
 
 class GraphDialog : public QDialog
@@ -28,7 +28,7 @@ private slots:
     void on_cbAutoV_clicked(bool checked);
 
 private:
-    Ui::GraphDialog *ui;
+    Ui::GraphSettings *ui;
     GraphParameters *const params = &globalParams.graph;
 
 signals:
